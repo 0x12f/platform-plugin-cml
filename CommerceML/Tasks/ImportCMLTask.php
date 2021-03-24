@@ -285,8 +285,17 @@ class ImportCMLTask extends AbstractTask
                 'field4' => $product['Длина'][0] ?? '',
                 'field5' => $product['Высота'][0] ?? '',
                 'properties' => [],
-                'files' => array_map(fn($path) => explode('.', str_replace('/', '', $path))[0] ?? '', $product['Картинка'] ?? []),
+                'files' => [],
             ];
+
+            if (!empty($product['Картинка'])) {
+                foreach ($product['Картинка'] as $path) {
+                    if (is_array($path)) {
+                        $path = array_shift($path);
+                    }
+                    $item['files'][] = explode('.', str_replace('/', '', $path))[0] ?? '';
+                }
+            }
 
             if (!empty($product['ЗначенияСвойств'])) {
                 foreach ($product['ЗначенияСвойств'] as $property) {
