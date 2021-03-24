@@ -228,7 +228,7 @@ class ImportCMLTask extends AbstractTask
 
         foreach ($data['Группы']['Группа'] as $group) {
             $output[] = $item = [
-                'title' => $group['Наименование'][0],
+                'title' => str_replace('/', '|', $group['Наименование'][0]),
                 'external_id' => $group['Ид'][0],
                 'parent' => $parent,
             ];
@@ -247,7 +247,7 @@ class ImportCMLTask extends AbstractTask
 
         foreach ($data['Свойства'] as $property) {
             $item = [
-                'title' => $property['Наименование'][0],
+                'title' => str_replace('/', '|', $property['Наименование'][0]),
                 'external_id' => $property['Ид'][0],
                 'variants' => [],
             ];
@@ -273,7 +273,7 @@ class ImportCMLTask extends AbstractTask
 
         foreach ($data['Товары']['Товар'] as $product) {
             $item = [
-                'title' => $product['Наименование'][0],
+                'title' => str_replace('/', '|', $product['Наименование'][0]),
                 'external_id' => $product['Ид'][0],
                 'category' => $product['Группы']['Ид'][0] ?? \Ramsey\Uuid\Uuid::NIL,
                 'barcode' => $product['Штрихкод'][0] ?? '',
