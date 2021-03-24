@@ -4,6 +4,8 @@ namespace Plugin\CommerceML;
 
 use Alksily\Support\Crypta;
 use App\Domain\AbstractPlugin;
+use App\Domain\Entities\File;
+use App\Domain\Service\File\FileService;
 use Psr\Container\ContainerInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -59,7 +61,7 @@ class CommerceMLPlugin extends AbstractPlugin
         // api для обмена
         $this
             ->map([
-                'methods' => ['get'],
+                'methods' => ['get', 'post'],
                 'pattern' => '/api/cml',
                 'handler' => fn($req, $res) => $this->action($req, $res),
             ])
@@ -86,7 +88,7 @@ class CommerceMLPlugin extends AbstractPlugin
                             return $this->respondWithText($response, ['zip=no', 'file_limit=' . self::MAX_FILE_SIZE]);
 
                         case 'file':
-                            if (($file = $this->getFileFromBody($request->getParam('filename', 'import.xml'))) !== null) {
+                            if (($file = $this->getFileFromBody($request, $request->getParam('filename', 'import.xml'))) !== null) {
                                 return $this->respondWithText($response, 'success');
                             }
 
@@ -161,6 +163,39 @@ class CommerceMLPlugin extends AbstractPlugin
         }
 
         return false;
+    }
+
+    /**
+     * For upload file from POST body
+     *
+     * @param string $filename
+     *
+     * @return File|null
+     */
+    protected function getFileFromBody(Request $request, $filename = ''): ?File
+    {
+        $uploaded = null;
+        $tmp_path = UPLOAD_DIR . '/' . uniqid();
+
+        if ($filename && file_put_contents($tmp_path, $request->getBody()->getContents()) !== false) {
+            $fileService = FileService::getWithContainer($this->container);
+
+            if (($model = $fileService->createFromPath($tmp_path, $filename)) !== null) {
+                $uploaded = $model;
+
+                // is image
+                if (str_start_with('image/', $model->getType())) {
+                    // add task convert
+                    $task = new \App\Domain\Tasks\ConvertImageTask($this->container);
+                    $task->execute(['uuid' => [$model->getUuid()]]);
+
+                    // run worker
+                    \App\Domain\AbstractTask::worker($task);
+                }
+            }
+        }
+
+        return $uploaded;
     }
 
     protected function respondWithText(Response $response, $output = ''): Response

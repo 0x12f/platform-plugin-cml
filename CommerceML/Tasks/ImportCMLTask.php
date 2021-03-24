@@ -65,6 +65,8 @@ class ImportCMLTask extends AbstractTask
                         $data['products'] = $this->parseProducts($xml['Каталог'][0]);
                         break;
                 }
+
+                $fileService->delete($file);
             }
 
             $this->setProgress($index, count($files));
