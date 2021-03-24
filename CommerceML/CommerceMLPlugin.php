@@ -52,7 +52,7 @@ class CommerceMLPlugin extends AbstractPlugin
             'name' => 'password',
             'args' => [
                 'placeholder' => 'Пароль пользователя',
-                'force-value' => $this->parameter('CommerceMLPlugin_password', false) === false ? uniqid() : null,
+                'force-value' => !$this->parameter('CommerceMLPlugin_password', '') ? uniqid() : null,
             ],
         ]);
 
