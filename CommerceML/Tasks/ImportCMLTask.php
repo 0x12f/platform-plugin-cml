@@ -61,6 +61,10 @@ class ImportCMLTask extends AbstractTask
                         $data['properties'] = $this->parseProperties($xml['Классификатор'][0]);
                         break;
 
+                    case isset($xml['ПакетПредложений'][0]['Предложения']) && !$data['prices']:
+                        $data['prices'] = collect($this->parsePrices($xml['ПакетПредложений'][0]));
+                        break;
+
                     case isset($xml['Каталог'][0]['Товары']) && !$data['products']:
                         $data['products'] = $this->parseProducts($xml['Каталог'][0]);
                         break;
@@ -138,6 +142,7 @@ class ImportCMLTask extends AbstractTask
             foreach ($data['products'] as $index => $datum) {
                 $create = false;
                 $category = $catalogCategoryService->read(['external_id' => $datum['category']])->getUuid();
+                $price = $data['prices'] ? ($data['prices']->firstWhere('product_uuid', $datum['external_id'])['price'] ?? .0) : .0;
 
                 try {
                     $datum['product'] = $catalogProductService->read(['external_id' => $datum['external_id']]);
@@ -149,7 +154,7 @@ class ImportCMLTask extends AbstractTask
                         'vendorcode' => $datum['vendorcode'],
                         'barcode' => $datum['barcode'],
                         'priceFirst' => 0.0,
-                        'price' => 0.0,
+                        'price' => $price,
                         'priceWholesale' => 0.0,
                         'volume' => $datum['volume'],
                         'unit' => $datum['unit'],
@@ -167,7 +172,7 @@ class ImportCMLTask extends AbstractTask
                                 'vendorcode' => $datum['vendorcode'],
                                 'barcode' => $datum['barcode'],
                                 'priceFirst' => 0.0,
-                                'price' => 0.0,
+                                'price' => $price,
                                 'priceWholesale' => 0.0,
                                 'volume' => $datum['volume'],
                                 'unit' => $datum['unit'],
@@ -261,6 +266,20 @@ class ImportCMLTask extends AbstractTask
             }
 
             $output[] = $item;
+        }
+
+        return $output;
+    }
+
+    protected function parsePrices(array $data): array
+    {
+        $output = [];
+
+        foreach ($data['Предложения']['Предложение'] as $property) {
+            $output[] = [
+                'product_uuid' => $property['Ид'][0],
+                'price' => +($property['Цены']['Цена']['ЦенаЗаЕдиницу'][0] ?? 0),
+            ];
         }
 
         return $output;

@@ -20,8 +20,8 @@ class CommerceMLPlugin extends AbstractPlugin
     const VERSION = '1.0';
 
     protected const COOKIE_NAME = 'WSE_CML';
-    protected const COOKIE_TIME = 10; // minutes
-    protected const MAX_FILE_SIZE = 100 * 1000 * 1000; // bytes
+    protected const COOKIE_TIME = 5; // minutes
+    protected const MAX_FILE_SIZE = 40 * 1000 * 1000; // bytes
 
     public function __construct(ContainerInterface $container)
     {
