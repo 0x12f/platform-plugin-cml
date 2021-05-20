@@ -13,11 +13,11 @@ use Slim\Http\Response;
 class CommerceMLPlugin extends AbstractPlugin
 {
     const NAME = 'CommerceMLPlugin';
-    const TITLE = 'CommerceML';
+    const TITLE = 'Интеграция с 1С';
     const DESCRIPTION = 'Плагин для реализации интеграции с 1С посредством CommerceML 3';
     const AUTHOR = 'Aleksey Ilyin';
-    const AUTHOR_SITE = 'https://site.0x12f.com';
-    const VERSION = '1.0';
+    const AUTHOR_SITE = 'https://getwebspace.org';
+    const VERSION = '1.1';
 
     protected const COOKIE_NAME = 'WSE_CML';
     protected const COOKIE_TIME = 5; // minutes
